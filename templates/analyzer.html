@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>AuthentiWrite</title>
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<header class="hero">
+
+<h1>AuthentiWrite</h1>
+<p>AI Powered Essay Authenticity Analyzer</p>
+
+</header>
+
+<section class="input-card">
+
+<h2>Essay Input</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+<textarea name="text" placeholder="Paste your essay here..."></textarea>
+
+<br><br>
+
+<input type="file" name="file">
+
+<br><br>
+
+<button type="submit">Analyze Essay</button>
+
+</form>
+
+</section>
+
+{% if result %}
+
+<section class="dashboard">
+
+<h2>Results Dashboard</h2>
+
+<div class="score-grid">
+
+<div class="score-card">
+<h3>Plagiarism</h3>
+<p>{{result.plagiarism}}%</p>
+<div class="progress">
+<div class="bar red" style="width: {{result.plagiarism}}%"></div>
+</div>
+</div>
+
+<div class="score-card">
+<h3>AI Generated</h3>
+<p>{{result.ai}}%</p>
+<div class="progress">
+<div class="bar yellow" style="width: {{result.ai}}%"></div>
+</div>
+</div>
+
+<div class="score-card">
+<h3>Authenticity</h3>
+<p>{{result.authenticity}}%</p>
+<div class="progress">
+<div class="bar green" style="width: {{result.authenticity}}%"></div>
+</div>
+</div>
+
+<div class="score-card">
+<h3>AI Rewriting</h3>
+<p>{{result.rewrite}}%</p>
+<div class="progress">
+<div class="bar blue" style="width: {{result.rewrite}}%"></div>
+</div>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- MOVED SECTIONS -->
+
+<section class="results">
+
+<h3>Suspicious Sentences</h3>
+
+<ul>
+
+{% for s in result.suspicious %}
+
+<li style="
+{% if s.color=='red' %}
+background:#ffd6d6;
+border-left:6px solid red;
+{% elif s.color=='yellow' %}
+background:#fff4cc;
+border-left:6px solid orange;
+{% endif %}
+padding:10px;
+margin:8px;
+border-radius:6px">
+
+{{s.text}}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+
+<h3>AI Rewritten Sentences</h3>
+
+<ul>
+
+{% for s in result.rewritten %}
+
+<li style="
+background:#e6f0ff;
+border-left:6px solid #54a0ff;
+padding:10px;
+margin:8px;
+border-radius:6px">
+
+{{s}}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+
+<h3>Writing Improvement Suggestions</h3>
+
+<ul>
+
+{% for s in result.suggestions %}
+
+<li style="
+background:#e8f7ee;
+border-left:6px solid #2ecc71;
+padding:10px;
+margin:8px;
+border-radius:6px">
+
+{{s}}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+</section>
+
+
+<!-- BAR GRAPH MOVED TO END -->
+
+<section class="graph-section">
+
+<h3>Authenticity Dashboard</h3>
+
+<canvas id="scoreChart"></canvas>
+
+</section>
+
+
+<script>
+
+const ctx = document.getElementById('scoreChart');
+
+new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['Plagiarism','AI Generated','Authenticity','Rewriting Risk'],
+datasets: [{
+label: 'Score %',
+data: [
+{{result.plagiarism}},
+{{result.ai}},
+{{result.authenticity}},
+{{result.rewrite}}
+],
+backgroundColor:[
+'#ff6b6b',
+'#feca57',
+'#1dd1a1',
+'#54a0ff'
+]
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+scales:{
+y:{
+beginAtZero:true,
+max:100
+}
+}
+}
+});
+
+</script>
+
+{% endif %}
+
+<footer>
+
+<p>AuthentiWrite • AI Academic Integrity Platform</p>
+
+</footer>
+
+</body>
+
+</html>
