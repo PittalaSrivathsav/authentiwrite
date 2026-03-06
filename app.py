@@ -2,8 +2,10 @@ from flask import Flask, render_template, request
 from plagiarism_checker import check_plagiarism
 from ai_detector import detect_ai
 import PyPDF2
+import os
 
 app = Flask(__name__)
+
 
 def read_uploaded_file(file):
 
@@ -11,7 +13,7 @@ def read_uploaded_file(file):
     text = ""
 
     if filename.endswith(".txt"):
-        text = file.read().decode("utf-8")
+        text = file.read().decode("utf-8", errors="ignore")
 
     elif filename.endswith(".pdf"):
 
@@ -74,6 +76,9 @@ def analyze():
     return render_template("analyzer.html", result=result)
 
 
+# RUN FLASK APP (FOR RENDER DEPLOYMENT)
 if __name__ == "__main__":
 
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+
+    app.run(host="0.0.0.0", port=port)
