@@ -12,18 +12,23 @@ def read_uploaded_file(file):
     filename = file.filename.lower()
     text = ""
 
-    if filename.endswith(".txt"):
-        text = file.read().decode("utf-8", errors="ignore")
+    try:
 
-    elif filename.endswith(".pdf"):
+        if filename.endswith(".txt"):
+            text = file.read().decode("utf-8", errors="ignore")
 
-        reader = PyPDF2.PdfReader(file)
+        elif filename.endswith(".pdf"):
 
-        for page in reader.pages:
-            page_text = page.extract_text()
+            reader = PyPDF2.PdfReader(file)
 
-            if page_text:
-                text += page_text + " "
+            for page in reader.pages:
+                page_text = page.extract_text()
+
+                if page_text:
+                    text += page_text + " "
+
+    except Exception as e:
+        print("File reading error:", e)
 
     return text.strip()
 
@@ -42,36 +47,45 @@ def analyze():
 
     if request.method == "POST":
 
-        text = request.form.get("text")
+        text = request.form.get("text", "")
         uploaded_file = request.files.get("file")
 
-        if uploaded_file and uploaded_file.filename != "":
-            text = read_uploaded_file(uploaded_file)
+        # Read uploaded file if provided
+        if uploaded_file and uploaded_file.filename:
+            file_text = read_uploaded_file(uploaded_file)
 
-        if text and len(text.strip()) > 0:
+            if file_text:
+                text = file_text
 
-            plagiarism_score, suspicious = check_plagiarism(text)
+        if text and text.strip():
 
-            ai_score, rewrite_score, rewritten_sentences = detect_ai(text)
+            try:
 
-            authenticity = round(100 - ((plagiarism_score + ai_score) / 2), 2)
+                plagiarism_score, suspicious = check_plagiarism(text)
 
-            suggestions = [
-                "Try adding personal examples or opinions to make the writing more original.",
-                "Vary your sentence lengths for more natural writing.",
-                "Use more diverse vocabulary."
-            ]
+                ai_score, rewrite_score, rewritten_sentences = detect_ai(text)
 
-            result = {
-                "text": text,
-                "plagiarism": plagiarism_score,
-                "ai": ai_score,
-                "rewrite": rewrite_score,
-                "rewritten": rewritten_sentences,
-                "authenticity": authenticity,
-                "suspicious": suspicious,
-                "suggestions": suggestions
-            }
+                authenticity = round(100 - ((plagiarism_score + ai_score) / 2), 2)
+
+                suggestions = [
+                    "Try adding personal examples or opinions to make the writing more original.",
+                    "Vary your sentence lengths for more natural writing.",
+                    "Use more diverse vocabulary."
+                ]
+
+                result = {
+                    "text": text,
+                    "plagiarism": plagiarism_score,
+                    "ai": ai_score,
+                    "rewrite": rewrite_score,
+                    "rewritten": rewritten_sentences,
+                    "authenticity": authenticity,
+                    "suspicious": suspicious,
+                    "suggestions": suggestions
+                }
+
+            except Exception as e:
+                print("Analysis error:", e)
 
     return render_template("analyzer.html", result=result)
 
