@@ -1,4 +1,16 @@
 flask
-scikit-learn
+PyPDF2
 nltk
 numpy
+scikit-learn
+scipy
+regex
+tqdm
+threadpoolctl
+joblib
+jinja2
+werkzeug
+click
+itsdangerous
+blinker
+markupsafe
